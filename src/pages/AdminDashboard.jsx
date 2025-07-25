@@ -194,7 +194,14 @@ function Sidebar({ navigate }) {
         >
           Product Management
         </li>
+        <li
+          onClick={() => navigate('/admin/stocks')}
+          className="hover:text-blue-600 cursor-pointer"
+        >
+          stock Management
+        </li>
         <li className="hover:text-blue-600 cursor-pointer">Employee Management</li>
+        
       </ul>
     </div>
   );

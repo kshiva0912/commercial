@@ -1,109 +1,108 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import AdminSidebar from '../components/AdminSidebar';
+import axios from 'axios';
 
 export default function ProductManagement() {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('/api/products')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setProducts(data);
-        } else {
-          console.error('Product fetch response is not an array:', data);
-        }
-      })
-      .catch((err) => console.error('Fetch error:', err));
+    fetchProducts();
   }, []);
 
-  const handleEdit = (product) => {
-    navigate('/admin/products/edit', { state: product });
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get('http://localhost:8000/api/products/');
+      if (Array.isArray(res.data)) {
+        setProducts(res.data);
+      } else {
+        console.error('Expected array but got:', res.data);
+        setProducts([]);
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    }
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure to delete this product?')) {
-      fetch(`/api/products/${id}`, { method: 'DELETE' })
-        .then((res) => res.json())
-        .then(() => {
-          setProducts(products.filter((p) => p.id !== id));
-        });
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8000/api/products/${id}/`);
+      fetchProducts(); // Refresh after delete
+    } catch (err) {
+      console.error('Error deleting product:', err);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="bg-white p-4 rounded-lg shadow-lg max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-center text-brown-700 mb-6">Product Management</h1>
+    <div className="flex flex-col md:flex-row min-h-screen">
+      <AdminSidebar />
+
+      <div className="flex-1 p-4 md:p-10 w-full">
+        <h2 className="text-2xl font-bold text-center mb-6">Product Management</h2>
 
         <div className="flex justify-center mb-6">
           <Link
             to="/admin/products/add"
-            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-lg font-semibold shadow"
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded"
           >
-            + Add Product
+            Add Product
           </Link>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-            <thead className="bg-brown-200 text-brown-900">
-              <tr>
-                <th className="p-3 text-left">Category</th>
-                <th className="p-3 text-left">Name</th>
-                <th className="p-3 text-left">Brand</th>
-                <th className="p-3 text-center">Quantity</th>
-                <th className="p-3 text-center">Price</th>
-                <th className="p-3 text-center">Actions</th>
+          <table className="min-w-full border border-gray-300 shadow-md rounded-lg overflow-hidden">
+            <thead className="bg-gray-100">
+              <tr className="text-left">
+                <th className="px-4 py-2">#</th>
+                <th className="px-4 py-2">Category</th>
+                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Brand</th>
+                <th className="px-4 py-2">Quantity</th>
+                <th className="px-4 py-2">Price</th>
+                <th className="px-4 py-2">Actions</th>
               </tr>
             </thead>
-            <tbody className="text-sm">
-              {products.map((product) => (
-                <tr key={product.id} className="border-b hover:bg-gray-100">
-                  <td className="p-3">{product.category}</td>
-                  <td className="p-3">{product.name}</td>
-                  <td className="p-3">{product.brand}</td>
-                  <td className="p-3 text-center">{product.quantity}</td>
-                  <td className="p-3 text-center">₹{product.price}</td>
-                  <td className="p-3 text-center flex justify-center gap-4">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="text-yellow-500 hover:text-yellow-600 text-xl"
-                      title="Edit"
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id)}
-                      className="text-red-500 hover:text-red-600 text-xl"
-                      title="Delete"
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {products.length === 0 && (
+            <tbody>
+              {products.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-6 text-gray-500 font-semibold">
-                    No products found.
+                  <td colSpan="7" className="text-center py-8 text-gray-500">
+                    No products available.
                   </td>
                 </tr>
+              ) : (
+                products.map((product, index) => (
+                  <tr
+                    key={product.id}
+                    className={`border-t ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                  >
+                    <td className="px-4 py-2">{index + 1}</td>
+                    <td className="px-4 py-2">{product.category}</td>
+                    <td className="px-4 py-2">{product.name}</td>
+                    <td className="px-4 py-2">{product.brand}</td>
+                    <td className="px-4 py-2">{product.quantity}</td>
+                    <td className="px-4 py-2">₹{product.price}</td>
+                    <td className="px-4 py-2 flex gap-3">
+                      <button
+                        onClick={() => navigate(`/admin/edit-product/${product.id}`)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
-      </div>
-      {/* Back to Dashboard Button */}
-      <div className="mt-6 text-center">
-        <Link
-          to="/admin"
-          className="inline-block bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 text-sm"
-        >
-          ← Back to Admin Dashboard
-        </Link>
       </div>
     </div>
   );

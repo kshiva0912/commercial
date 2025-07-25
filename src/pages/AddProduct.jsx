@@ -1,122 +1,77 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import AdminSidebar from '../components/AdminSidebar';
 import { useNavigate } from 'react-router-dom';
 
 export default function AddProduct() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     product_name: '',
     product_spasifie_id: '',
-    catogary_of_produt: '',
-    barand_name: '',
+    category_of_product: '',
+    brand_name: '',
     sale_price: '',
     buy_price: '',
     des_of_product: '',
     stock_id: '',
     buy_date: '',
-    careate_date: '',
-    is_active: true,
-    update_date: '',
-    upadte_by: '',
-    is_live: true,
-    quentity_product: '',
+    is_active: 1,
+    update_by: '',
+    is_live: 1,
+    quantity_product: '',
     original_amount_of_product: '',
     discount_of_product: '',
+    product_about_id: '',
+    product_img: null
   });
-
-  const navigate = useNavigate();
-
+  
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
+    const { name, value, type, files } = e.target;
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: type === 'file' ? files[0] : value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await axios.post('/api/products', form);
-      navigate('/admin/products');
-    } catch (error) {
-      console.error('Product creation failed:', error);
-    }
+    // Later: integrate API here
+    console.log(form);
+    alert('Product data submitted');
+    navigate('/admin/product-management');
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-8 bg-white shadow-lg rounded-md">
-      <h2 className="text-2xl font-bold text-blue-700 mb-6">Add New Product</h2>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[
-          { name: 'product_name', label: 'Product Name' },
-          { name: 'product_spasifie_id', label: 'Product Specific ID' },
-          { name: 'catogary_of_produt', label: 'Category' },
-          { name: 'barand_name', label: 'Brand Name' },
-          { name: 'sale_price', label: 'Sale Price', type: 'number' },
-          { name: 'buy_price', label: 'Buy Price', type: 'number' },
-          { name: 'stock_id', label: 'Stock ID' },
-          { name: 'quentity_product', label: 'Quantity', type: 'number' },
-          { name: 'original_amount_of_product', label: 'Original Amount', type: 'number' },
-          { name: 'discount_of_product', label: 'Discount (%)', type: 'number' },
-          { name: 'buy_date', label: 'Buy Date', type: 'date' },
-          { name: 'careate_date', label: 'Create Date', type: 'date' },
-          { name: 'update_date', label: 'Update Date', type: 'date' },
-          { name: 'upadte_by', label: 'Updated By' },
-        ].map(({ name, label, type = 'text' }) => (
-          <div key={name}>
-            <label className="block text-sm font-semibold mb-1 text-gray-700">{label}</label>
-            <input
-              type={type}
-              name={name}
-              value={form[name]}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-        ))}
-
-        {/* Description field full width */}
-        <div className="md:col-span-2">
-          <label className="block text-sm font-semibold mb-1 text-gray-700">Product Description</label>
-          <textarea
-            name="des_of_product"
-            value={form.des_of_product}
-            onChange={handleChange}
-            rows="3"
-            required
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
-
-        {/* Boolean switches */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="is_active"
-            checked={form.is_active}
-            onChange={handleChange}
-            className="h-5 w-5"
-          />
-          <label className="text-gray-700 font-semibold">Is Active</label>
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="is_live"
-            checked={form.is_live}
-            onChange={handleChange}
-            className="h-5 w-5"
-          />
-          <label className="text-gray-700 font-semibold">Is Live</label>
-        </div>
-
-        <div className="md:col-span-2 flex justify-center mt-6">
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded text-lg shadow"
-          >
-            Save Product
-          </button>
-        </div>
-      </form>
+    <div className="min-h-screen flex flex-col md:flex-row">
+      <AdminSidebar />
+      <div className="flex-1 p-4 md:p-8 bg-gray-50 w-full">
+        <h1 className="text-2xl font-bold mb-6 text-center">Add New Product</h1>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input name="product_name" onChange={handleChange} value={form.product_name} placeholder="Product Name" className="input" required />
+          <input name="product_spasifie_id" onChange={handleChange} value={form.product_spasifie_id} placeholder="Specific ID (optional)" className="input" />
+          <input name="category_of_product" onChange={handleChange} value={form.category_of_product} placeholder="Product Category" className="input" required />
+          <input name="brand_name" onChange={handleChange} value={form.brand_name} placeholder="Brand Name" className="input" required />
+          <input name="sale_price" onChange={handleChange} value={form.sale_price} placeholder="Sale Price" type="number" className="input" required />
+          <input name="buy_price" onChange={handleChange} value={form.buy_price} placeholder="Buy Price" type="number" className="input" required />
+          <input name="des_of_product" onChange={handleChange} value={form.des_of_product} placeholder="Product Description" className="input" />
+          <input name="stock_id" onChange={handleChange} value={form.stock_id} placeholder="Stock ID (optional)" type="number" className="input" />
+          <input name="buy_date" onChange={handleChange} value={form.buy_date} type="date" className="input" />
+          <select name="is_active" onChange={handleChange} value={form.is_active} className="input">
+            <option value={1}>Active</option>
+            <option value={0}>Inactive</option>
+          </select>
+          <input name="update_by" onChange={handleChange} value={form.update_by} placeholder="Updated By (optional)" className="input" />
+          <select name="is_live" onChange={handleChange} value={form.is_live} className="input">
+            <option value={1}>Live</option>
+            <option value={0}>Hidden</option>
+          </select>
+          <input name="quantity_product" onChange={handleChange} value={form.quantity_product} placeholder="Quantity" type="number" className="input" required />
+          <input name="original_amount_of_product" onChange={handleChange} value={form.original_amount_of_product} placeholder="Original Price" type="number" className="input" required />
+          <input name="discount_of_product" onChange={handleChange} value={form.discount_of_product} placeholder="Discount (optional)" type="number" className="input" />
+          <input name="product_about_id" onChange={handleChange} value={form.product_about_id} placeholder="About ID (optional)" type="number" className="input" />
+          <input name="product_img" onChange={handleChange} type="file" className="input" accept=".jpg,.jpeg,.png,.webp" />
+          <button type="submit" className="col-span-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Add Product</button>
+        </form>
+      </div>
     </div>
   );
 }
